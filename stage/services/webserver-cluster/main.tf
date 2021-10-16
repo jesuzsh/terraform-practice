@@ -2,15 +2,15 @@ provider "aws" {
   region = "us-east-2"
 }
 
-variable "server_port" {
-  description = "The port the server will use for HTTP requests"
-  type        = number
-  default     = 8080
-}
-
-output "alb_dns_name" {
-  value       = aws_lb.example.dns_name
-  description = "The domain name of the load balancer"
+terraform {
+  backend "s3" {
+    bucket         = "bucketp369-terraform-state"
+    key            = "stage/services/webserver_cluster/terraform.tfstate"
+    region         = "us-east-2"
+    
+    dynamodb_table = "terraform369p-locks"
+    encrypt        = true
+  }
 }
 
 data "aws_vpc" "default" {
@@ -46,7 +46,7 @@ resource "aws_autoscaling_group" "example" {
   target_group_arns = [aws_lb_target_group.asg.arn]
   health_check_type = "ELB"
 
-  desired_capacity = 6
+  desired_capacity = 2
 
   min_size = 2
   max_size = 10
